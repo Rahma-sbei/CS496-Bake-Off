@@ -1,0 +1,50 @@
+{"id": "math_01", "question": "Evaluate: 4 * 4 + 1", "expected_answer": "17"}
+{"id": "math_02", "question": "Evaluate: 2 + 3 * 5", "expected_answer": "17"}
+{"id": "math_03", "question": "Evaluate: 20 - 4 / 2", "expected_answer": "18"}
+{"id": "math_04", "question": "Evaluate: 6 + 12 / 3 * 2", "expected_answer": "14"}
+{"id": "math_05", "question": "Evaluate: (8 + 2) * 3 - 5", "expected_answer": "25"}
+{"id": "math_06", "question": "Evaluate: 15 / 3 + 2 * 6", "expected_answer": "17"}
+{"id": "math_07", "question": "Evaluate: 100 - 10 * 3^2", "expected_answer": "10"}
+{"id": "math_08", "question": "Evaluate: 5 * (4 + 3) - 10", "expected_answer": "25"}
+{"id": "math_09", "question": "Evaluate: 18 / (6 - 3) + 7", "expected_answer": "13"}
+{"id": "math_10", "question": "Evaluate: 3 + 4 * 2^3 - 5", "expected_answer": "30"}
+{"id": "math_11", "question": "Evaluate 2*x + 5*y for x = 3, y = 4.", "expected_answer": "26"}
+{"id": "math_12", "question": "Evaluate a^2 - 3*b for a = 5, b = 2.", "expected_answer": "19"}
+{"id": "math_13", "question": "Evaluate 3*(x - 2) + 4 for x = 6.", "expected_answer": "16"}
+{"id": "math_14", "question": "Evaluate (m / 2)^2 - 5 for m = 10.", "expected_answer": "20"}
+{"id": "math_15", "question": "Evaluate 3*p*q - 2*p for p = 4, q = 3.", "expected_answer": "28"}
+{"id": "math_16", "question": "Evaluate 4*x^2 - 3*x + 7 for x = 2.", "expected_answer": "17"}
+{"id": "math_17", "question": "Evaluate (a + b) / (a - b) for a = 8, b = 4.", "expected_answer": "3"}
+{"id": "math_18", "question": "Evaluate 50 / (z + 5) + 2*z for z = 5.", "expected_answer": "15"}
+{"id": "math_19", "question": "Evaluate (x*y)^2 - 10 for x = 3, y = 2.", "expected_answer": "26"}
+{"id": "math_20", "question": "Evaluate 2*(n + 3) - n for n = 7.", "expected_answer": "13"}
+{"id": "math_21", "question": "A rectangle's length is 3m longer than width w. Perimeter is 26m. Calculate width w.", "expected_answer": "5"}
+{"id": "math_22", "question": "Sarah has 5 more than twice Alex's books (x). Total is 35. Calculate Alex's books x.", "expected_answer": "10"}
+{"id": "math_23", "question": "Shirts cost $15 each plus $5 shipping fee. Total cost is $80. Calculate the number of shirts s.", "expected_answer": "5"}
+{"id": "math_24", "question": "Sum of 3 consecutive integers starting at x is 72. Calculate the value of x.", "expected_answer": "23"}
+{"id": "math_25", "question": "A train travels at speed v for 2h, then (v + 10) for 3h, covering 280km. Calculate speed v.", "expected_answer": "50"}
+{"id": "math_26", "question": "Balance grows by $50/month m from $200 initial to $950 total. Calculate the number of months m.", "expected_answer": "15"}
+{"id": "math_27", "question": "Taxi fare is $3 base plus $2/mile m. Total is $21. Calculate miles m.", "expected_answer": "9"}
+{"id": "math_28", "question": "Three times a number n minus 7 equals 20. Calculate number n.", "expected_answer": "9"}
+{"id": "math_29", "question": "Car rental is $40/day d plus $0.15/mile for 100 miles. Total is $175. Calculate days d.", "expected_answer": "4"}
+{"id": "math_30", "question": "Divide $120 between A and B where A gets $20 more than B (x). Calculate B's share x.", "expected_answer": "50"}
+{"id": "math_31", "question": "Assets = $150,000, Equity = $65,000. Calculate Liabilities in dollars.", "expected_answer": "85000"}
+{"id": "math_32", "question": "Liabilities = $45,000, Equity = $80,000. Calculate Assets in dollars.", "expected_answer": "125000"}
+{"id": "math_33", "question": "Revenue = $200,000, Expenses = $130,000, Tax rate = 20%. Calculate Net Profit after tax in dollars.", "expected_answer": "56000"}
+{"id": "math_34", "question": "Sales = $50,000, COGS = $22,000, Operating Expenses = $10,000. Calculate Operating Income in dollars.", "expected_answer": "18000"}
+{"id": "math_35", "question": "Current Assets = $60,000, Current Liabilities = $25,000. Calculate Current Ratio (Assets/Liabilities).", "expected_answer": "2.4"}
+{"id": "math_36", "question": "A $12,000 asset depreciates $1,500/year for y = 4 years. Calculate remaining Value V.", "expected_answer": "6000"}
+{"id": "math_37", "question": "Simple interest on $5,000 at 6% annual rate for t years is $1,200. Calculate t.", "expected_answer": "4"}
+{"id": "math_38", "question": "Net Income = $24,000, Revenue = $120,000. Calculate Profit Margin percentage (number only).", "expected_answer": "20"}
+{"id": "math_39", "question": "Debt = $40,000, Equity = $100,000. Calculate Debt-to-Equity Ratio.", "expected_answer": "0.4"}
+{"id": "math_40", "question": "Inventory: 100 units at $10 + 50 units at $12. Sold 80 units. Calculate remaining inventory value using FIFO.", "expected_answer": "800"}
+{"id": "math_41", "question": "Sum of x and y is 30, difference (x - y) is 8. Calculate value of x.", "expected_answer": "19"}
+{"id": "math_42", "question": "3 adult tickets (a) at $15 each and 2 child tickets (c) cost $55 total. Calculate child ticket cost c.", "expected_answer": "5"}
+{"id": "math_43", "question": "50 total coins of quarters q and dimes d total $8.00. Calculate number of quarters q.", "expected_answer": "20"}
+{"id": "math_44", "question": "Worker A builds 5 units/h, Worker B builds 7 units/h. Together they built 84 units in h hours. Calculate h.", "expected_answer": "7"}
+{"id": "math_45", "question": "20 liters of solution contains 15% acid. How many liters of pure acid are in the solution?", "expected_answer": "3"}
+{"id": "math_46", "question": "Fixed cost = $5,000, variable cost per item x = $15. Total cost = $11,000. Calculate items x.", "expected_answer": "400"}
+{"id": "math_47", "question": "$1,000 grows to $1,210 in 2 years at annual rate r. Calculate rate r.", "expected_answer": "0.1"}
+{"id": "math_48", "question": "Phone plan is $30 plus $0.05 per text t. Total bill is $42.50. Calculate number of texts t.", "expected_answer": "250"}
+{"id": "math_49", "question": "Fixed Costs = $10,000, Price/unit = $50, Variable Cost/unit = $30. Calculate break-even units x.", "expected_answer": "500"}
+{"id": "math_50", "question": "Pipe A fills tank in 4h, Pipe B in 6h. Calculate combined hourly rate R.", "expected_answer": "5/12"}

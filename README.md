@@ -4,81 +4,64 @@ A benchmark tool to evaluate and compare the reasoning and accuracy of cloud and
 
 ## Overview
 
-This project runs an automated evaluation across 50 mathematical questions of varying difficulty (ranging from basic arithmetic to algebraic expressions). Each item features human-made, verified answers.
+This project runs an automated evaluation across 50 math questions (arithmetic, algebra, word problems, basic finance), each with a single human-verified correct answer. Scoring is fully automatic (SymPy equivalence check, no human or LLM judge).
 
 We evaluate three model tiers:
 
-1. **Top API Model:** `nvidia/nemotron-3-ultra-550b-a55b:free` (via OpenRouter)
-2. **Cheap API Model:** `cohere/north-mini-code:free` (via OpenRouter)
-3. **Local Open-Weights Model:** `qwen2.5:7b` (via Ollama)
+1. **Top API Model:** `openai/gpt-oss-120b` (via Groq)
+2. **Cheap API Model:** `openai/gpt-oss-20b` (via Groq)
+3. **Local Open-Weights Model:** `qwen2.5:7b` (via Ollama, run on our own hardware)
 
-The pipeline executes all 50 items against each model, compares output correctness against the ground-truth targets, logs latencies/errors, and exports the findings into a report.
+The pipeline runs all 50 items against each model, scores correctness against the ground-truth answers, logs latency and real token usage, and produces `results/per_item.csv`, `results/summary.csv`, and an HTML report.
 
 ---
 
-## Prerequisites & Requirements
+## Prerequisites
 
-- **Python 3.10+**
-- **OpenRouter API Key:** Required for cloud model inference.
-- **Ollama:** Installed and running locally with the Qwen model pulled:
+- Python 3.10+
+- A **Groq API key** (free at [console.groq.com](https://console.groq.com/keys)) — used for both API tiers
+- **Ollama** installed and running locally with the model pulled:
   ```bash
-  ollama run qwen2.5:7b
-  Quickstart & Execution
+  ollama pull qwen2.5:7b
   ```
 
-1. Set Up Environment
-   Create a virtual environment and install dependencies:
+## Quickstart
 
-# Create virtual environment
-
-```
+```bash
 python -m venv .venv
-```
-
-# Activate environment
-
-# On Linux/macOS:
-
-```
-source .venv/bin/activate
-```
-
-# On Windows:
-
-```
-.venv\Scripts\activate
-```
-
-# Install requirements
-
-```
+source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-2. Configure Environment Variables
-
-Create a `.env` file in the root directory and add your OpenRouter API key, and you local ollama url:
+Create a `.env` file in the repo root:
 
 ```
-OPENROUTER_API_KEY=your_openrouter_api_key_here
+GROQ_API_KEY=your_groq_api_key_here
 OLLAMA_BASE_URL=http://localhost:11434/v1
-
 ```
 
-3. Run the Bake-off Benchmark
-   Execute the evaluation script to query all models and produce raw performance metrics:
+Run the benchmark, then generate the report:
 
-```
+```bash
 python bake-off.py
-```
-
-Outputs: results.csv (contains responses, latency, and pass/fail status per item).
-
-4. Generate the HTML Report
-   Run the report generator to convert raw results into an interactive HTML dashboard:
-
-```
 python report_generator.py
 ```
 
-Outputs: report.html (open in any browser to inspect metrics, charts, and failure analysis).
+Outputs:
+- `results/per_item.csv` — one row per (model, item): prediction, correctness, latency, real token counts, real cost
+- `results/summary.csv` — one row per model: accuracy, p50/p95 latency, cost per 1k requests (now and at 100x traffic)
+- `results/report.html` — human-readable dashboard
+
+**Before running `report_generator.py`**, set `HARDWARE_HOURLY_COST_USD` at the top of that file to the real hourly cost of the machine Ollama ran on (a comparable cloud instance's price, or your electricity rate) — see `results/hardware_note.md`.
+
+## No API keys in this repo
+
+`.env` is git-ignored. Never commit real keys.
+
+## Contributions
+
+<!-- TODO: fill in with real names before freezing the repo -->
+- **Rahma Sbei** — initial repo setup, task design (50 math items), SymPy scorer, HTML report generator
+- **[Name 2]** — [what they did]
+- **[Name 3]** — [what they did]
+- **[Name 4]** — [what they did]

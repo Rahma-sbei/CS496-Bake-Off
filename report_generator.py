@@ -2,20 +2,42 @@ import os
 import csv
 import numpy as np
 
-# Model metadata backup if needed for tier lookups
+# ---------------------------------------------------------------------------
+# The one number nobody but you can supply: what your Ollama machine would
+# cost to rent per hour (a comparable cloud CPU/GPU instance's hourly price,
+# or your electricity draw x price/kWh if you'd rather use strict marginal
+# cost). Do NOT invent this number - look up a real instance price or your
+# real electricity rate and write it here, then note the source in
+# results/hardware_note.md.
+# ponytail: single flat rate, no spot/reserved pricing tiers - upgrade if you
+# actually shop around for a specific instance type.
+# ---------------------------------------------------------------------------
+HARDWARE_HOURLY_COST_USD = 0.0045 # e.g. 0.10  <-- TODO: fill this in, see comment above
+
 MODEL_TIERS = {
-    "nvidia/nemotron-3-ultra-550b-a55b:free": "Top API Model",
-    "cohere/north-mini-code:free": "Cheap API Model",
-    "qwen2.5": "Local Open-Weights Model"
+    "openai/gpt-oss-120b": "Top API Model",
+    "openai/gpt-oss-20b": "Cheap API Model",
+    "qwen2.5:7b": "Local Open-Weights Model",
 }
 
-def generate_html_from_csv(csv_path: str = "results/per_item.csv", output_html_path: str = "results/report.html"):
+LOCAL_MODEL_NAME = "qwen2.5:7b"
+
+
+def generate_report(csv_path: str = "results/per_item.csv",
+                     output_html_path: str = "results/report.html",
+                     summary_csv_path: str = "results/summary.csv"):
     if not os.path.exists(csv_path):
-        raise FileNotFoundError(f"Source CSV file not found at '{csv_path}'. Run evaluation script first.")
+        raise FileNotFoundError(f"Source CSV file not found at '{csv_path}'. Run bake-off.py first.")
+
+    if HARDWARE_HOURLY_COST_USD is None:
+        raise ValueError(
+            "Set HARDWARE_HOURLY_COST_USD at the top of this file before generating the report "
+            "(the real $/hour your Ollama machine would cost to rent, or your electricity cost). "
+            "This is required for the cost-at-100x and break-even numbers the brief asks for."
+        )
 
     # Group evaluation items by model name
     models_data = {}
-
     with open(csv_path, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -23,391 +45,197 @@ def generate_html_from_csv(csv_path: str = "results/per_item.csv", output_html_p
             if model_name not in models_data:
                 models_data[model_name] = {
                     "tier": row.get("tier") or MODEL_TIERS.get(model_name, "API Model"),
-                    "cost_per_1k": float(row.get("cost_per_1k", 0.00)),
-                    "items": []
+                    "items": [],
                 }
-
-            is_correct = row["is_correct"].strip().lower() == "true"
-            latency_ms = float(row["latency_ms"])
-
-            models_data[model_name]["items"].append({
-                "item_id": row["item_id"],
-                "question": row["question"],
-                "expected": row["expected"],
-                "prediction": row["prediction"],
-                "is_correct": is_correct,
-                "latency_ms": latency_ms
-            })
+            models_data[model_name]["items"].append(row)
 
     summary_results = []
 
     for model_name, data in models_data.items():
         items = data["items"]
         total_items = len(items)
-        correct_count = sum(1 for item in items if item["is_correct"])
+        correct_count = sum(1 for r in items if r["is_correct"].strip().lower() == "true")
         wrong_count = total_items - correct_count
-        latencies = [item["latency_ms"] for item in items]
+        latencies = sorted(float(r["latency_ms"]) for r in items)
+        p50 = float(np.percentile(latencies, 50)) if latencies else 0.0
+        p95 = float(np.percentile(latencies, 95)) if latencies else 0.0
+
+        is_local = model_name == LOCAL_MODEL_NAME
+
+        if is_local:
+            # Brief's formula: hardware cost per hour / requests per hour.
+            # Requests/hour here = current measured serial throughput (3600s / p50 latency).
+            requests_per_hour_now = 3600.0 / (p50 / 1000.0) if p50 > 0 else 0.0
+            cost_per_req_now = (HARDWARE_HOURLY_COST_USD / requests_per_hour_now) if requests_per_hour_now else 0.0
+            cost_per_1k_now = cost_per_req_now * 1000
+            # Same box, 100x more requests routed through it (only valid if the
+            # hardware can actually sustain that throughput - call this out in the report).
+            cost_per_1k_100x = cost_per_1k_now / 100.0
+            comp_tokens = [int(r["completion_tokens"]) for r in items if r.get("completion_tokens")]
+            lat_s = [float(r["latency_ms"]) / 1000.0 for r in items if r.get("completion_tokens")]
+            tok_per_sec = (
+                float(np.mean([c / l for c, l in zip(comp_tokens, lat_s) if l > 0]))
+                if comp_tokens else 0.0
+            )
+        else:
+            costs = [float(r["cost_usd"]) for r in items if r.get("cost_usd")]
+            cost_per_req_now = float(np.mean(costs)) if costs else 0.0
+            cost_per_1k_now = cost_per_req_now * 1000
+            # No committed-use/bulk discount on these list prices -> flat per-request cost at any volume.
+            cost_per_1k_100x = cost_per_1k_now
+            tok_per_sec = None
 
         wrong_examples = []
-        for item in items:
-            if not item["is_correct"]:
-                if len(wrong_examples) < 3:
-                    wrong_examples.append({
-                        "id": item["item_id"],
-                        "question": item["question"],
-                        "expected": item["expected"],
-                        "actual": item["prediction"]
-                    })
-
-        accuracy_pct = (correct_count / total_items) * 100.0 if total_items > 0 else 0.0
-        p50_latency = np.percentile(latencies, 50) if latencies else 0.0
-        p95_latency = np.percentile(latencies, 95) if latencies else 0.0
+        for r in items:
+            if r["is_correct"].strip().lower() != "true" and len(wrong_examples) < 3:
+                wrong_examples.append({
+                    "id": r["item_id"], "question": r["question"],
+                    "expected": r["expected"], "actual": r["prediction"],
+                })
 
         summary_results.append({
             "tier": data["tier"],
             "model_name": model_name,
+            "is_local": is_local,
             "correct": correct_count,
             "wrong": wrong_count,
             "total": total_items,
-            "accuracy_pct": round(accuracy_pct, 2),
-            "p50_latency": round(p50_latency, 2),
-            "p95_latency": round(p95_latency, 2),
-            "cost_per_1k": data["cost_per_1k"],
-            "wrong_examples": wrong_examples
+            "accuracy_pct": round(100.0 * correct_count / total_items, 2) if total_items else 0.0,
+            "p50_latency": round(p50, 2),
+            "p95_latency": round(p95, 2),
+            "cost_per_1k_now": round(cost_per_1k_now, 4),
+            "cost_per_1k_100x": round(cost_per_1k_100x, 4),
+            "tokens_per_sec": round(tok_per_sec, 1) if tok_per_sec else None,
+            "wrong_examples": wrong_examples,
         })
 
-    # Build Summary Table Rows
+    # --- Break-even volume: local cost/1k (which falls as traffic rises, since the
+    # hourly hardware rate is fixed) vs each API model's flat cost/1k. Solve for the
+    # requests/hour at which local's amortized cost matches the API's flat cost.
+    local_row = next((s for s in summary_results if s["is_local"]), None)
+    breakeven_notes = []
+    if local_row:
+        p50_s = local_row["p50_latency"] / 1000.0
+        for s in summary_results:
+            if s["is_local"] or s["cost_per_1k_now"] <= 0:
+                continue
+            api_cost_per_req = s["cost_per_1k_now"] / 1000.0
+            breakeven_req_per_hour = HARDWARE_HOURLY_COST_USD / api_cost_per_req if api_cost_per_req else float("inf")
+            breakeven_notes.append({
+                "vs": s["model_name"],
+                "requests_per_hour": round(breakeven_req_per_hour, 1),
+            })
+
+    # --- Write results/summary.csv ---
+    os.makedirs(os.path.dirname(summary_csv_path) or ".", exist_ok=True)
+    with open(summary_csv_path, "w", newline="", encoding="utf-8") as f:
+        fieldnames = ["tier", "model_name", "correct", "wrong", "total", "accuracy_pct",
+                      "p50_latency_ms", "p95_latency_ms", "cost_per_1k_usd_now",
+                      "cost_per_1k_usd_at_100x", "tokens_per_sec"]
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for s in summary_results:
+            writer.writerow({
+                "tier": s["tier"], "model_name": s["model_name"],
+                "correct": s["correct"], "wrong": s["wrong"], "total": s["total"],
+                "accuracy_pct": s["accuracy_pct"],
+                "p50_latency_ms": s["p50_latency"], "p95_latency_ms": s["p95_latency"],
+                "cost_per_1k_usd_now": s["cost_per_1k_now"],
+                "cost_per_1k_usd_at_100x": s["cost_per_1k_100x"],
+                "tokens_per_sec": s["tokens_per_sec"] or "",
+            })
+
+    # --- HTML report (same look as before, extra cost columns) ---
     rows_html = ""
     for s in summary_results:
         acc = s['accuracy_pct']
         acc_color = "#10b981" if acc >= 80 else ("#f59e0b" if acc >= 50 else "#ef4444")
-        cost_display = f"${s['cost_per_1k']:.2f}" if s['cost_per_1k'] > 0 else "Free"
-
         rows_html += f"""
-        <tr>
-            <td><strong style="color: #f8fafc;">{s['tier']}</strong></td>
-            <td><code class="model-code">{s['model_name']}</code></td>
-            <td><span class="pill pill-neutral">{s['correct']}/{s['total']}</span></td>
-            <td><span class="pill" style="background: {acc_color}20; color: {acc_color}; border: 1px solid {acc_color}40;">{acc}%</span></td>
-            <td><span class="latency-val">{s['p50_latency']} ms</span></td>
-            <td><span class="latency-val">{s['p95_latency']} ms</span></td>
-            <td><span class="pill pill-free">{cost_display}</span></td>
-        </tr>
-        """
+<tr>
+<td><strong style="color: #f8fafc;">{s['tier']}</strong></td>
+<td><code class="model-code">{s['model_name']}</code></td>
+<td><span class="pill pill-neutral">{s['correct']}/{s['total']}</span></td>
+<td><span class="pill" style="background: {acc_color}20; color: {acc_color}; border: 1px solid {acc_color}40;">{acc}%</span></td>
+<td><span class="latency-val">{s['p50_latency']} ms</span></td>
+<td><span class="latency-val">{s['p95_latency']} ms</span></td>
+<td><span class="pill pill-free">${s['cost_per_1k_now']:.4f}</span></td>
+<td><span class="pill pill-free">${s['cost_per_1k_100x']:.4f}</span></td>
+</tr>
+"""
 
-    # Build Failure Cards
     failure_cards_html = ""
     has_failures = False
-
     for s in summary_results:
-        if s["wrong_examples"]:
+        for ex in s["wrong_examples"]:
             has_failures = True
-            for ex in s["wrong_examples"]:
-                failure_cards_html += f"""
-                <div class="failure-card">
-                    <div class="card-header">
-                        <span class="badge badge-fail">FAILED</span>
-                        <span class="item-id">Item #{ex['id']}</span>
-                        <span class="tier-tag">{s['tier']} ({s['model_name']})</span>
-                    </div>
-                    <div class="card-body">
-                        <p style="margin-bottom: 12px;"><strong>Prompt:</strong> {ex['question']}</p>
-                        <div class="comparison-grid">
-                            <div>
-                                <span class="label">Expected Target:</span>
-                                <code class="code-target">{ex['expected']}</code>
-                            </div>
-                            <div>
-                                <span class="label">Model Output:</span>
-                                <code class="code-err">{ex['actual']}</code>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                """
-
+            failure_cards_html += f"""
+<div class="failure-card">
+<div class="card-header">
+<span class="badge badge-fail">FAILED</span>
+<span class="item-id">Item #{ex['id']}</span>
+<span class="tier-tag">{s['tier']} ({s['model_name']})</span>
+</div>
+<div class="card-body">
+<p style="margin-bottom: 12px;"><strong>Prompt:</strong> {ex['question']}</p>
+<div class="comparison-grid">
+<div><span class="label">Expected Target:</span><code class="code-target">{ex['expected']}</code></div>
+<div><span class="label">Model Output:</span><code class="code-err">{ex['actual']}</code></div>
+</div>
+</div>
+</div>
+"""
     if not has_failures:
-        failure_cards_html = '<p class="no-failures">🎉 Zero failures recorded across all benchmarked models!</p>'
+        failure_cards_html = '<p class="no-failures">Zero failures recorded across all benchmarked models!</p>'
+
+    breakeven_html = "".join(
+        f"<li><strong>Local vs {b['vs']}:</strong> break-even at ~{b['requests_per_hour']} requests/hour "
+        f"(above that, self-hosting is cheaper per request; below it, the API is cheaper because you're "
+        f"paying for idle hardware time).</li>"
+        for b in breakeven_notes
+    )
 
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project 0: Model Evaluation Report</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        :root {{
-            --bg-color: #0f172a;
-            --panel-bg: #1e293b;
-            --panel-border: #334155;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent-blue: #3b82f6;
-            --pass-green: #10b981;
-            --fail-red: #ef4444;
-            --card-hover: #24334d;
-        }}
-
-        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-
-        body {{
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding: 40px 20px;
-            line-height: 1.6;
-        }}
-
-        .container {{
-            max-width: 1100px;
-            margin: 0 auto;
-        }}
-
-        /* Header Section */
-        header {{
-            margin-bottom: 40px;
-            border-bottom: 1px solid var(--panel-border);
-            padding-bottom: 24px;
-        }}
-
-        .header-title {{
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
-        }}
-
-        h1 {{
-            font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }}
-
-        .subtitle {{
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }}
-
-        .pill-meta {{
-            display: inline-block;
-            background: var(--panel-bg);
-            border: 1px solid var(--panel-border);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            color: var(--accent-blue);
-            font-family: 'JetBrains Mono', monospace;
-        }}
-
-        /* Section Styling */
-        section {{
-            background: var(--panel-bg);
-            border: 1px solid var(--panel-border);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 32px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-        }}
-
-        h2 {{
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #e2e8f0;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }}
-
-        h2::before {{
-            content: '';
-            display: inline-block;
-            width: 4px;
-            height: 18px;
-            background: var(--accent-blue);
-            border-radius: 2px;
-        }}
-
-        /* Table Design */
-        .table-responsive {{ overflow-x: auto; }}
-
-        table {{
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 0.9rem;
-        }}
-
-        th {{
-            background: #0f172a;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--panel-border);
-        }}
-
-        td {{
-            padding: 16px;
-            border-bottom: 1px solid var(--panel-border);
-            color: #cbd5e1;
-        }}
-
-        tr:last-child td {{ border-bottom: none; }}
-
-        tr:hover td {{ background: var(--card-hover); }}
-
-        /* Code & Pills */
-        code {{
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            padding: 3px 8px;
-            border-radius: 6px;
-        }}
-
-        .model-code {{ background: #0f172a; color: #93c5fd; border: 1px solid var(--panel-border); }}
-        .code-target {{ background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); display: inline-block; width: 100%; word-break: break-all; }}
-        .code-err {{ background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); display: inline-block; width: 100%; word-break: break-all; }}
-
-        .pill {{
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.8rem;
-            display: inline-block;
-        }}
-
-        .pill-neutral {{ background: #334155; color: #f1f5f9; }}
-        .pill-free {{ background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }}
-        .latency-val {{ font-family: 'JetBrains Mono', monospace; color: #94a3b8; }}
-
-        /* Failure Cards */
-        .failure-grid {{ display: flex; flex-direction: column; gap: 16px; }}
-
-        .failure-card {{
-            background: #0f172a;
-            border: 1px solid var(--panel-border);
-            border-left: 4px solid var(--fail-red);
-            border-radius: 8px;
-            padding: 18px;
-        }}
-
-        .card-header {{
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-        }}
-
-        .badge {{
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }}
-
-        .badge-fail {{ background: var(--fail-red); color: white; }}
-        .item-id {{ font-weight: 600; color: #f1f5f9; font-size: 0.9rem; }}
-        .tier-tag {{ color: var(--text-muted); font-size: 0.8rem; }}
-
-        .comparison-grid {{
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin: 8px 0;
-            background: var(--panel-bg);
-            padding: 12px;
-            border-radius: 6px;
-        }}
-
-        .label {{
-            display: block;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }}
-
-        /* Trade-offs List */
-        .tradeoff-list {{
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }}
-
-        .tradeoff-list li {{
-            background: #0f172a;
-            padding: 16px;
-            border-radius: 8px;
-            border: 1px solid var(--panel-border);
-        }}
-
-        .tradeoff-list strong {{ color: #60a5fa; }}
-        .no-failures {{ color: var(--pass-green); font-weight: 500; text-align: center; padding: 20px; }}
-    </style>
+<meta charset="UTF-8">
+<title>Project 0: Model Evaluation Report</title>
+<style>
+body {{ font-family: -apple-system, sans-serif; background:#0f172a; color:#f8fafc; padding:40px; }}
+.container {{ max-width:1100px; margin:0 auto; }}
+section {{ background:#1e293b; border:1px solid #334155; border-radius:12px; padding:24px; margin-bottom:32px; }}
+table {{ width:100%; border-collapse:collapse; font-size:0.9rem; }}
+th {{ background:#0f172a; color:#94a3b8; text-align:left; padding:12px; }}
+td {{ padding:12px; border-bottom:1px solid #334155; }}
+code {{ font-family: monospace; padding:2px 6px; border-radius:4px; }}
+.model-code {{ background:#0f172a; color:#93c5fd; }}
+.pill {{ padding:4px 10px; border-radius:6px; font-weight:600; font-size:0.8rem; }}
+.pill-neutral {{ background:#334155; }}
+.pill-free {{ background:rgba(59,130,246,0.15); color:#60a5fa; }}
+.failure-card {{ background:#0f172a; border-left:4px solid #ef4444; border-radius:8px; padding:16px; margin-bottom:12px; }}
+.comparison-grid {{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }}
+.code-target {{ background:rgba(16,185,129,0.15); color:#34d399; display:block; }}
+.code-err {{ background:rgba(239,68,68,0.15); color:#fca5a5; display:block; }}
+</style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="header-title">
-                <h1>Project 0: Model Evaluation Report</h1>
-            </div>
-            <p class="subtitle">
-                Automated 50-Item Benchmark Bakeoff &nbsp;|&nbsp;
-                <span class="pill-meta">Temperature = 0.0</span>
-                <span class="pill-meta">Max Tokens = 256</span>
-            </p>
-        </header>
-
-        <section>
-            <h2>1. Benchmark Results Summary</h2>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Tier</th>
-                            <th>Model</th>
-                            <th>Score</th>
-                            <th>Accuracy (%)</th>
-                            <th>p50 Latency</th>
-                            <th>p95 Latency</th>
-                            <th>Cost / 1k Req</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {rows_html}
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <section>
-            <h2>2. Failure Analysis & Sample Errors</h2>
-            <div class="failure-grid">
-                {failure_cards_html}
-            </div>
-        </section>
-
-        <section>
-            <h2>3. Interpretation & Deployment Trade-offs</h2>
-            <ul class="tradeoff-list">
-                <li>
-                    <strong>Accuracy vs. Cost:</strong> Premium API models deliver high accuracy on complex formulations, whereas local sub-8B parameter models struggle with strict output constraints and multi-step symbolic evaluation.
-                </li>
-                <li>
-                    <strong>Latency vs. Ownership:</strong> Local models operated via Ollama eliminate per-token API costs and data privacy concerns, but their latency is bounded by local GPU/CPU compute throughput.
-                </li>
-            </ul>
-        </section>
-    </div>
+<div class="container">
+<h1>Project 0: Model Evaluation Report</h1>
+<section>
+<h2>1. Results Summary</h2>
+<table>
+<thead><tr><th>Tier</th><th>Model</th><th>Score</th><th>Accuracy</th><th>p50</th><th>p95</th><th>$/1k now</th><th>$/1k @100x</th></tr></thead>
+<tbody>{rows_html}</tbody>
+</table>
+</section>
+<section>
+<h2>2. Break-even volume (self-hosted vs API)</h2>
+<ul>{breakeven_html}</ul>
+</section>
+<section>
+<h2>3. Failure Analysis</h2>
+{failure_cards_html}
+</section>
+</div>
 </body>
 </html>
 """
@@ -415,7 +243,8 @@ def generate_html_from_csv(csv_path: str = "results/per_item.csv", output_html_p
     with open(output_html_path, "w", encoding="utf-8") as f:
         f.write(html_content)
 
-    print(f"HTML report generated successfully at {output_html_path}.")
+    print(f"Wrote {summary_csv_path} and {output_html_path}.")
+
 
 if __name__ == "__main__":
-    generate_html_from_csv()
+    generate_report()

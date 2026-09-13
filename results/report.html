@@ -1,66 +1,604 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Project 0: Model Evaluation Report</title>
-<style>
-body { font-family: -apple-system, sans-serif; background:#0f172a; color:#f8fafc; padding:40px; }
-.container { max-width:1100px; margin:0 auto; }
-section { background:#1e293b; border:1px solid #334155; border-radius:12px; padding:24px; margin-bottom:32px; }
-table { width:100%; border-collapse:collapse; font-size:0.9rem; }
-th { background:#0f172a; color:#94a3b8; text-align:left; padding:12px; }
-td { padding:12px; border-bottom:1px solid #334155; }
-code { font-family: monospace; padding:2px 6px; border-radius:4px; }
-.model-code { background:#0f172a; color:#93c5fd; }
-.pill { padding:4px 10px; border-radius:6px; font-weight:600; font-size:0.8rem; }
-.pill-neutral { background:#334155; }
-.pill-free { background:rgba(59,130,246,0.15); color:#60a5fa; }
-.failure-card { background:#0f172a; border-left:4px solid #ef4444; border-radius:8px; padding:16px; margin-bottom:12px; }
-.comparison-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-.code-target { background:rgba(16,185,129,0.15); color:#34d399; display:block; }
-.code-err { background:rgba(239,68,68,0.15); color:#fca5a5; display:block; }
-</style>
-</head>
-<body>
-<div class="container">
-<h1>Project 0: Model Evaluation Report</h1>
-<section>
-<h2>1. Results Summary</h2>
-<table>
-<thead><tr><th>Tier</th><th>Model</th><th>Score</th><th>Accuracy</th><th>p50</th><th>p95</th><th>$/1k now</th><th>$/1k @100x</th></tr></thead>
-<tbody>
-<tr>
-<td><strong style="color: #f8fafc;">Top API Model</strong></td>
-<td><code class="model-code">openai/gpt-oss-120b</code></td>
-<td><span class="pill pill-neutral">50/50</span></td>
-<td><span class="pill" style="background: #10b98120; color: #10b981; border: 1px solid #10b98140;">100.0%</span></td>
-<td><span class="latency-val">557.07 ms</span></td>
-<td><span class="latency-val">2666.23 ms</span></td>
-<td><span class="pill pill-free">$0.0695</span></td>
-<td><span class="pill pill-free">$0.0695</span></td>
-</tr>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Project 0 — Model Bake-Off Report</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0b0f17;
+        --panel: #121826;
+        --panel-alt: #0e1420;
+        --border: #223049;
+        --text: #e4e9f2;
+        --text-dim: #8c97ab;
+        --gold: #c9a24b;
+        --teal: #4f9c93;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          "IBM Plex Sans",
+          -apple-system,
+          sans-serif;
+        line-height: 1.6;
+        padding: 56px 24px 96px;
+      }
+      .container {
+        max-width: 760px;
+        margin: 0 auto;
+      }
+      header.title-block h1 {
+        font-family: "Newsreader", Georgia, serif;
+        font-weight: 600;
+        font-size: 2.1rem;
+        margin: 0 0 10px;
+        letter-spacing: -0.01em;
+      }
+      header.title-block .subtitle {
+        color: var(--text-dim);
+        font-family: "Newsreader", Georgia, serif;
+        font-style: italic;
+        font-size: 1.05rem;
+        margin: 0 0 24px;
+      }
+      .meta-row {
+        display: flex;
+        gap: 32px;
+        flex-wrap: wrap;
+        padding-top: 18px;
+        border-top: 1px solid var(--border);
+        font-size: 0.85rem;
+      }
+      .meta-row div span.k {
+        color: var(--text-dim);
+        display: block;
+        margin-bottom: 2px;
+      }
+      hr.divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 44px 0;
+      }
+      section {
+        margin-bottom: 48px;
+      }
+      h2 {
+        font-family: "Newsreader", Georgia, serif;
+        font-weight: 600;
+        font-size: 1.3rem;
+        margin: 0 0 16px;
+      }
+      .sec-no {
+        font-family: "IBM Plex Mono", monospace;
+        color: var(--gold);
+        font-size: 0.85rem;
+        margin-right: 10px;
+      }
+      p {
+        margin: 0 0 14px;
+      }
+      .example-box {
+        background: var(--panel-alt);
+        border-left: 3px solid var(--teal);
+        border-radius: 4px;
+        padding: 14px 18px;
+        font-size: 0.92rem;
+        margin: 18px 0;
+      }
+      .example-box .label {
+        color: var(--text-dim);
+        font-size: 0.78rem;
+        display: block;
+        margin-bottom: 4px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+      }
+      th {
+        text-align: left;
+        color: var(--text-dim);
+        font-weight: 500;
+        font-size: 0.78rem;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      td {
+        padding: 12px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+      }
+      td.num {
+        font-family: "IBM Plex Mono", monospace;
+      }
+      tr.winner-row td {
+        background: rgba(201, 162, 75, 0.06);
+      }
+      tr.winner-row td:first-child {
+        border-left: 2px solid var(--gold);
+      }
+      .winner-tag {
+        font-size: 0.72rem;
+        color: var(--gold);
+        border: 1px solid rgba(201, 162, 75, 0.4);
+        border-radius: 3px;
+        padding: 1px 6px;
+        margin-left: 6px;
+      }
+      code {
+        font-family: "IBM Plex Mono", monospace;
+        color: #9ecbff;
+        background: var(--panel-alt);
+        padding: 1px 5px;
+        border-radius: 3px;
+      }
+      .pill {
+        padding: 3px 9px;
+        border-radius: 5px;
+        font-size: 0.82rem;
+        font-weight: 500;
+      }
+      .kv-panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 4px 18px;
+      }
+      .kv-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 11px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.9rem;
+      }
+      .kv-row:last-child {
+        border-bottom: none;
+      }
+      .kv-key {
+        color: var(--text-dim);
+      }
+      .kv-val {
+        text-align: right;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.85rem;
+      }
+      .failure-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-left: 3px solid #d9645f;
+        border-radius: 6px;
+        padding: 16px 18px;
+        margin-bottom: 14px;
+      }
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.82rem;
+        color: var(--text-dim);
+        margin-bottom: 10px;
+      }
+      .failure-q {
+        margin-bottom: 12px;
+        font-size: 0.92rem;
+      }
+      .comparison-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .comparison-grid .label {
+        display: block;
+        font-size: 0.76rem;
+        color: var(--text-dim);
+        margin-bottom: 4px;
+      }
+      .code-target {
+        background: rgba(111, 174, 124, 0.12);
+        color: #8fca9c;
+        display: block;
+      }
+      .code-err {
+        background: rgba(217, 100, 95, 0.12);
+        color: #eb9691;
+        display: block;
+      }
+      .no-failures {
+        color: var(--text-dim);
+        font-style: italic;
+      }
+      .conclusion-box {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 20px 22px;
+      }
+      footer {
+        margin-top: 60px;
+        color: var(--text-dim);
+        font-size: 0.78rem;
+        border-top: 1px solid var(--border);
+        padding-top: 18px;
+      }
+      @media (max-width: 560px) {
+        .comparison-grid {
+          grid-template-columns: 1fr;
+        }
+        table,
+        thead,
+        tbody,
+        th,
+        td,
+        tr {
+          display: block;
+        }
+        thead {
+          display: none;
+        }
+        tr {
+          border-bottom: 1px solid var(--border);
+          padding: 10px 0;
+        }
+        td {
+          border: none;
+          padding: 4px 0;
+        }
+        td::before {
+          content: attr(data-label);
+          color: var(--text-dim);
+          display: inline-block;
+          width: 110px;
+          font-size: 0.75rem;
+        }
+      }
+      a {
+        color: var(--teal);
+      }
+      :focus-visible {
+        outline: 2px solid var(--gold);
+        outline-offset: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="title-block">
+        <h1>Project 0 — Model Bake-Off Report</h1>
+        <p class="subtitle">
+          Three models, one frozen test set, judged on accuracy, latency and
+          cost.
+        </p>
+        <div class="meta-row">
+          <div>
+            <span class="k">Team</span>Nadia Ben Njima, Ahmed Brini, Rahma Sbei,
+            Mariem Lahmar
+          </div>
+          <div><span class="k">Date</span>2026-09-13</div>
+        </div>
+      </header>
 
-<tr>
-<td><strong style="color: #f8fafc;">Cheap API Model</strong></td>
-<td><code class="model-code">openai/gpt-oss-20b</code></td>
-<td><span class="pill pill-neutral">50/50</span></td>
-<td><span class="pill" style="background: #10b98120; color: #10b981; border: 1px solid #10b98140;">100.0%</span></td>
-<td><span class="latency-val">432.27 ms</span></td>
-<td><span class="latency-val">2575.96 ms</span></td>
-<td><span class="pill pill-free">$0.0359</span></td>
-<td><span class="pill pill-free">$0.0359</span></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section>
-<h2>2. Break-even volume (self-hosted vs API)</h2>
-<ul></ul>
-</section>
-<section>
-<h2>3. Failure Analysis</h2>
-<p class="no-failures">Zero failures recorded across all benchmarked models!</p>
-</section>
-</div>
-</body>
+      <hr class="divider" />
+
+      <section>
+        <h2><span class="sec-no">01</span>The task</h2>
+        <p>
+          Evaluate three models on 50 short math problems against a
+          human-verified answer.
+        </p>
+        <div class="example-box">
+          <span class="label">Example item</span>
+          A rectangle's length is 3m longer than width w. Perimeter is 26m.
+          Calculate width w. — expected answer: <code>5</code>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="sec-no">02</span>Results summary</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Model</th>
+              <th>Score</th>
+              <th>Accuracy</th>
+              <th>p50</th>
+              <th>p95</th>
+              <th>$/1k now</th>
+              <th>$/1k @100x</th>
+              <th>Throughput</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="">
+              <td>Top API Model</td>
+              <td><code>openai/gpt-oss-120b</code></td>
+              <td>50/50</td>
+              <td>
+                <span
+                  class="pill"
+                  style="
+                    background: #6fae7c22;
+                    color: #6fae7c;
+                    border: 1px solid #6fae7c55;
+                  "
+                  >100.0%</span
+                >
+              </td>
+              <td>518 ms</td>
+              <td>2864 ms</td>
+              <td class="num">$0.0693</td>
+              <td class="num">$0.0693</td>
+              <td class="num">—</td>
+            </tr>
+            <tr class="winner-row">
+              <td>
+                Cheap API Model <span class="winner-tag">recommended</span>
+              </td>
+              <td><code>openai/gpt-oss-20b</code></td>
+              <td>50/50</td>
+              <td>
+                <span
+                  class="pill"
+                  style="
+                    background: #6fae7c22;
+                    color: #6fae7c;
+                    border: 1px solid #6fae7c55;
+                  "
+                  >100.0%</span
+                >
+              </td>
+              <td>566 ms</td>
+              <td>2494 ms</td>
+              <td class="num">$0.0360</td>
+              <td class="num">$0.0360</td>
+              <td class="num">—</td>
+            </tr>
+            <tr class="">
+              <td>Local Open-Weights Model</td>
+              <td><code>qwen2.5:7b</code></td>
+              <td>24/50</td>
+              <td>
+                <span
+                  class="pill"
+                  style="
+                    background: #d9645f22;
+                    color: #d9645f;
+                    border: 1px solid #d9645f55;
+                  "
+                  >48.0%</span
+                >
+              </td>
+              <td>2095 ms</td>
+              <td>3234 ms</td>
+              <td class="num">$0.0000</td>
+              <td class="num">$0.0000</td>
+              <td class="num">3.2 tok/s</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2><span class="sec-no">03</span>Data &amp; setup</h2>
+        <div class="kv-panel">
+          <div class="kv-row">
+            <span class="kv-key">Source</span
+            ><span class="kv-val">Hand-written by the team</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">Composition</span
+            ><span class="kv-val"
+              >10 arithmetic, 10 algebraic substitution, 30 word problems /
+              finance</span
+            >
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">Label check</span
+            ><span class="kv-val"
+              >Two team members independently solved each item; all ground-truth
+              answers matched</span
+            >
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">Dev/test split</span
+            ><span class="kv-val"
+              >None — all 50 items served as the single frozen test set</span
+            >
+          </div>
+        </div>
+        <table style="margin-top: 20px">
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Model</th>
+              <th>Provider</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Top API Model</td>
+              <td><code>openai/gpt-oss-120b</code></td>
+              <td>Groq</td>
+            </tr>
+            <tr>
+              <td>Cheap API Model</td>
+              <td><code>openai/gpt-oss-20b</code></td>
+              <td>Groq</td>
+            </tr>
+            <tr>
+              <td>Local Open-Weights Model</td>
+              <td><code>qwen2.5:7b</code></td>
+              <td>Ollama (self-hosted)</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="kv-panel" style="margin-top: 16px">
+          <div class="kv-row">
+            <span class="kv-key">Temperature</span><span class="kv-val">0</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">Max tokens</span
+            ><span class="kv-val">256</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">System prompt</span
+            ><span class="kv-val"
+              >Identical across models, forces \boxed{answer}-only output</span
+            >
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">Item order</span
+            ><span class="kv-val"
+              >Same 50 items, same order, same parser for all models</span
+            >
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">Run date</span
+            ><span class="kv-val">2026-09-13</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="sec-no">04</span>Cost at scale &amp; break-even</h2>
+
+        <p>
+          Local hosting's cost per request falls as more traffic is spread over
+          the same fixed hardware. Below each threshold, the API is cheaper
+          because you're paying for idle hardware time; above it, self-hosting
+          wins per request.
+        </p>
+        <div class="kv-panel">
+          <div class="kv-row">
+            <span class="kv-key">vs. openai/gpt-oss-120b</span>
+            <span class="kv-val">~0 requests/hour</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">vs. openai/gpt-oss-20b</span>
+            <span class="kv-val">~0 requests/hour</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="sec-no">05</span>Failure analysis</h2>
+
+        <div class="failure-card">
+          <div class="card-header">
+            <span class="item-id">Item math_04</span>
+            <span class="tier-tag">Local Open-Weights Model · qwen2.5:7b</span>
+          </div>
+          <p class="failure-q">Evaluate: 6 + 12 / 3 * 2</p>
+          <div class="comparison-grid">
+            <div>
+              <span class="label">Expected</span
+              ><code class="code-target">14</code>
+            </div>
+            <div>
+              <span class="label">Model output</span
+              ><code class="code-err">20</code>
+            </div>
+          </div>
+        </div>
+        <div class="failure-card">
+          <div class="card-header">
+            <span class="item-id">Item math_05</span>
+            <span class="tier-tag">Local Open-Weights Model · qwen2.5:7b</span>
+          </div>
+          <p class="failure-q">Evaluate: (8 + 2) * 3 - 5</p>
+          <div class="comparison-grid">
+            <div>
+              <span class="label">Expected</span
+              ><code class="code-target">25</code>
+            </div>
+            <div>
+              <span class="label">Model output</span
+              ><code class="code-err">21</code>
+            </div>
+          </div>
+        </div>
+        <div class="failure-card">
+          <div class="card-header">
+            <span class="item-id">Item math_07</span>
+            <span class="tier-tag">Local Open-Weights Model · qwen2.5:7b</span>
+          </div>
+          <p class="failure-q">Evaluate: 100 - 10 * 3^2</p>
+          <div class="comparison-grid">
+            <div>
+              <span class="label">Expected</span
+              ><code class="code-target">10</code>
+            </div>
+            <div>
+              <span class="label">Model output</span
+              ><code class="code-err">40</code>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="sec-no">05</span> Hardware note — qwen2.5:7b</h2>
+        <div class="kv-panel">
+          <div class="kv-row">
+            <span class="kv-key">Machine</span
+            ><span class="kv-val">NVIDIA GeForce RTX 3050, 24GB RAM</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">Ollama version</span
+            ><span class="kv-val">0.34.0</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">Measured p50 latency</span
+            ><span class="kv-val">2095 ms</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">Measured throughput</span
+            ><span class="kv-val">3.2 tok/s</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="sec-no">06</span>Conclusion</h2>
+        <div class="conclusion-box">
+          <p>
+            <strong>openai/gpt-oss-20b</strong> (Cheap API Model) is the pick
+            from this run: 100.0% accuracy at $0.0360 per 1k requests, with a
+            566 ms median latency. qwen2.5:7b is cheaper per request
+            ($0.0000/1k) but trails on accuracy (48.0%), which is why it isn't
+            the top choice here. openai/gpt-oss-120b has the lowest median
+            latency (518 ms) if response time matters more than the accuracy
+            gap.
+          </p>
+          <p>
+            Self-hosting qwen2.5:7b isn't viable yet: accuracy (48.0%) is the
+            blocker, not cost. At scale its cost per request would fall toward
+            $0.0000/1k, but that only matters once its accuracy (48.0%) is
+            fixed, for instance through fine-tuning or a larger local model.
+          </p>
+          <p>
+            Revisit this call if traffic volume, problem difficulty, or model
+            pricing shifts enough to change any of the numbers above.
+          </p>
+        </div>
+      </section>
+
+      <footer>
+        Generated automatically from results/per_item.csv. Cost and break-even
+        figures assume a hardware rate of $0/hour.
+      </footer>
+    </div>
+  </body>
 </html>

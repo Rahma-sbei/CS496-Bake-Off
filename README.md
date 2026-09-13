@@ -48,19 +48,15 @@ python report_generator.py
 ```
 
 Outputs:
+
 - `results/per_item.csv` — one row per (model, item): prediction, correctness, latency, real token counts, real cost
 - `results/summary.csv` — one row per model: accuracy, p50/p95 latency, cost per 1k requests (now and at 100x traffic)
 - `results/report.html` — human-readable dashboard
 
-**Before running `report_generator.py`**, set `HARDWARE_HOURLY_COST_USD` at the top of that file to the real hourly cost of the machine Ollama ran on (a comparable cloud instance's price, or your electricity rate) — see `results/hardware_note.md`.
-
-## No API keys in this repo
-
-`.env` is git-ignored. Never commit real keys.
-
 ## Contributions
 
 <!-- TODO: fill in with real names before freezing the repo -->
+
 - **Rahma Sbei** — initial repo setup, task design (50 math items), SymPy scorer, HTML report generator
 - **[Name 2]** — [what they did]
 - **[Name 3]** — [what they did]

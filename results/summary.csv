@@ -1,3 +1,4 @@
 tier,model_name,correct,wrong,total,accuracy_pct,p50_latency_ms,p95_latency_ms,cost_per_1k_usd_now,cost_per_1k_usd_at_100x,tokens_per_sec
-Top API Model,openai/gpt-oss-120b,50,0,50,100.0,557.07,2666.23,0.0695,0.0695,
-Cheap API Model,openai/gpt-oss-20b,50,0,50,100.0,432.27,2575.96,0.0359,0.0359,
+Top API Model,openai/gpt-oss-120b,50,0,50,100.0,518.25,2864.24,0.0693,0.0693,
+Cheap API Model,openai/gpt-oss-20b,50,0,50,100.0,565.54,2493.64,0.036,0.036,
+Local Open-Weights Model,qwen2.5:7b,24,26,50,48.0,2094.75,3233.62,0.0,0.0,3.2

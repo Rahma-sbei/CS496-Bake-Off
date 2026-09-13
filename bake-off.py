@@ -44,14 +44,14 @@ MODELS = [
         "price_in_per_mtok": 0.075,
         "price_out_per_mtok": 0.30,
     },
-    #{
-    #    "tier": "Local Open-Weights Model",
-    #    "name": "qwen2.5:7b",
-    #    "client": ollama_client,
-    #    "is_local": True,
-    #    "price_in_per_mtok": 0.0,
-    #    "price_out_per_mtok": 0.0,
-    #},
+    {
+       "tier": "Local Open-Weights Model",
+       "name": "qwen2.5:7b",
+       "client": ollama_client,
+       "is_local": True,
+       "price_in_per_mtok": 0.0,
+       "price_out_per_mtok": 0.0,
+    },
 ]
 
 

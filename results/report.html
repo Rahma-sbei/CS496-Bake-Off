@@ -2,760 +2,603 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Project 0: Model Evaluation Report</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Project 0 — Model Bake-Off Report</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <style>
       :root {
-        --bg-color: #0f172a;
-        --panel-bg: #1e293b;
-        --panel-border: #334155;
-        --text-main: #f8fafc;
-        --text-muted: #94a3b8;
-        --accent-blue: #3b82f6;
-        --pass-green: #10b981;
-        --fail-red: #ef4444;
-        --card-hover: #24334d;
+        --bg: #0b0f17;
+        --panel: #121826;
+        --panel-alt: #0e1420;
+        --border: #223049;
+        --text: #e4e9f2;
+        --text-dim: #8c97ab;
+        --gold: #c9a24b;
+        --teal: #4f9c93;
       }
-
       * {
         box-sizing: border-box;
-        margin: 0;
-        padding: 0;
       }
-
       body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
         font-family:
-          "Inter",
+          "IBM Plex Sans",
           -apple-system,
-          BlinkMacSystemFont,
           sans-serif;
-        background-color: var(--bg-color);
-        color: var(--text-main);
-        padding: 40px 20px;
         line-height: 1.6;
+        padding: 56px 24px 96px;
       }
-
       .container {
-        max-width: 1100px;
+        max-width: 760px;
         margin: 0 auto;
       }
-
-      /* Header Section */
-      header {
-        margin-bottom: 40px;
-        border-bottom: 1px solid var(--panel-border);
-        padding-bottom: 24px;
-      }
-
-      .header-title {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 8px;
-      }
-
-      h1 {
-        font-size: 2rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-
-      .subtitle {
-        color: var(--text-muted);
-        font-size: 0.95rem;
-      }
-
-      .pill-meta {
-        display: inline-block;
-        background: var(--panel-bg);
-        border: 1px solid var(--panel-border);
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        color: var(--accent-blue);
-        font-family: "JetBrains Mono", monospace;
-      }
-
-      /* Section Styling */
-      section {
-        background: var(--panel-bg);
-        border: 1px solid var(--panel-border);
-        border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 32px;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-      }
-
-      h2 {
-        font-size: 1.25rem;
+      header.title-block h1 {
+        font-family: "Newsreader", Georgia, serif;
         font-weight: 600;
-        color: #e2e8f0;
-        margin-bottom: 20px;
+        font-size: 2.1rem;
+        margin: 0 0 10px;
+        letter-spacing: -0.01em;
+      }
+      header.title-block .subtitle {
+        color: var(--text-dim);
+        font-family: "Newsreader", Georgia, serif;
+        font-style: italic;
+        font-size: 1.05rem;
+        margin: 0 0 24px;
+      }
+      .meta-row {
         display: flex;
-        align-items: center;
-        gap: 8px;
+        gap: 32px;
+        flex-wrap: wrap;
+        padding-top: 18px;
+        border-top: 1px solid var(--border);
+        font-size: 0.85rem;
       }
-
-      h2::before {
-        content: "";
-        display: inline-block;
-        width: 4px;
-        height: 18px;
-        background: var(--accent-blue);
-        border-radius: 2px;
+      .meta-row div span.k {
+        color: var(--text-dim);
+        display: block;
+        margin-bottom: 2px;
       }
-
-      /* Table Design */
-      .table-responsive {
-        overflow-x: auto;
+      hr.divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 44px 0;
       }
-
+      section {
+        margin-bottom: 48px;
+      }
+      h2 {
+        font-family: "Newsreader", Georgia, serif;
+        font-weight: 600;
+        font-size: 1.3rem;
+        margin: 0 0 16px;
+      }
+      .sec-no {
+        font-family: "IBM Plex Mono", monospace;
+        color: var(--gold);
+        font-size: 0.85rem;
+        margin-right: 10px;
+      }
+      p {
+        margin: 0 0 14px;
+      }
+      .example-box {
+        background: var(--panel-alt);
+        border-left: 3px solid var(--teal);
+        border-radius: 4px;
+        padding: 14px 18px;
+        font-size: 0.92rem;
+        margin: 18px 0;
+      }
+      .example-box .label {
+        color: var(--text-dim);
+        font-size: 0.78rem;
+        display: block;
+        margin-bottom: 4px;
+      }
       table {
         width: 100%;
         border-collapse: collapse;
+        font-size: 0.88rem;
+      }
+      th {
         text-align: left;
+        color: var(--text-dim);
+        font-weight: 500;
+        font-size: 0.78rem;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      td {
+        padding: 12px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+      }
+      td.num {
+        font-family: "IBM Plex Mono", monospace;
+      }
+      tr.winner-row td {
+        background: rgba(201, 162, 75, 0.06);
+      }
+      tr.winner-row td:first-child {
+        border-left: 2px solid var(--gold);
+      }
+      .winner-tag {
+        font-size: 0.72rem;
+        color: var(--gold);
+        border: 1px solid rgba(201, 162, 75, 0.4);
+        border-radius: 3px;
+        padding: 1px 6px;
+        margin-left: 6px;
+      }
+      code {
+        font-family: "IBM Plex Mono", monospace;
+        color: #9ecbff;
+        background: var(--panel-alt);
+        padding: 1px 5px;
+        border-radius: 3px;
+      }
+      .pill {
+        padding: 3px 9px;
+        border-radius: 5px;
+        font-size: 0.82rem;
+        font-weight: 500;
+      }
+      .kv-panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 4px 18px;
+      }
+      .kv-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 11px 0;
+        border-bottom: 1px solid var(--border);
         font-size: 0.9rem;
       }
-
-      th {
-        background: #0f172a;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 0.05em;
-        padding: 14px 16px;
-        border-bottom: 1px solid var(--panel-border);
-      }
-
-      td {
-        padding: 16px;
-        border-bottom: 1px solid var(--panel-border);
-        color: #cbd5e1;
-      }
-
-      tr:last-child td {
+      .kv-row:last-child {
         border-bottom: none;
       }
-
-      tr:hover td {
-        background: var(--card-hover);
+      .kv-key {
+        color: var(--text-dim);
       }
-
-      /* Code & Pills */
-      code {
-        font-family: "JetBrains Mono", monospace;
+      .kv-val {
+        text-align: right;
+        font-family: "IBM Plex Mono", monospace;
         font-size: 0.85rem;
-        padding: 3px 8px;
-        border-radius: 6px;
       }
-
-      .model-code {
-        background: #0f172a;
-        color: #93c5fd;
-        border: 1px solid var(--panel-border);
-      }
-      .code-target {
-        background: rgba(16, 185, 129, 0.15);
-        color: #34d399;
-        border: 1px solid rgba(16, 185, 129, 0.3);
-        display: inline-block;
-        width: 100%;
-        word-break: break-all;
-      }
-      .code-err {
-        background: rgba(239, 68, 68, 0.15);
-        color: #fca5a5;
-        border: 1px solid rgba(239, 68, 68, 0.3);
-        display: inline-block;
-        width: 100%;
-        word-break: break-all;
-      }
-
-      .pill {
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 0.8rem;
-        display: inline-block;
-      }
-
-      .pill-neutral {
-        background: #334155;
-        color: #f1f5f9;
-      }
-      .pill-free {
-        background: rgba(59, 130, 246, 0.15);
-        color: #60a5fa;
-        border: 1px solid rgba(59, 130, 246, 0.3);
-      }
-      .latency-val {
-        font-family: "JetBrains Mono", monospace;
-        color: #94a3b8;
-      }
-
-      /* Failure Cards */
-      .failure-grid {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-      }
-
       .failure-card {
-        background: #0f172a;
-        border: 1px solid var(--panel-border);
-        border-left: 4px solid var(--fail-red);
-        border-radius: 8px;
-        padding: 18px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-left: 3px solid #d9645f;
+        border-radius: 6px;
+        padding: 16px 18px;
+        margin-bottom: 14px;
       }
-
       .card-header {
         display: flex;
-        align-items: center;
-        gap: 12px;
+        justify-content: space-between;
+        font-size: 0.82rem;
+        color: var(--text-dim);
+        margin-bottom: 10px;
+      }
+      .failure-q {
         margin-bottom: 12px;
+        font-size: 0.92rem;
       }
-
-      .badge {
-        padding: 3px 8px;
-        border-radius: 4px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        text-transform: uppercase;
-      }
-
-      .badge-fail {
-        background: var(--fail-red);
-        color: white;
-      }
-      .item-id {
-        font-weight: 600;
-        color: #f1f5f9;
-        font-size: 0.9rem;
-      }
-      .tier-tag {
-        color: var(--text-muted);
-        font-size: 0.8rem;
-      }
-
       .comparison-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 16px;
-        margin: 8px 0;
-        background: var(--panel-bg);
-        padding: 12px;
-        border-radius: 6px;
+        gap: 12px;
       }
-
-      .label {
+      .comparison-grid .label {
         display: block;
-        font-size: 0.75rem;
-        color: var(--text-muted);
-        text-transform: uppercase;
+        font-size: 0.76rem;
+        color: var(--text-dim);
         margin-bottom: 4px;
       }
-
-      /* Trade-offs & Detailed Analysis List */
-      .tradeoff-list {
-        list-style: none;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
+      .code-target {
+        background: rgba(111, 174, 124, 0.12);
+        color: #8fca9c;
+        display: block;
       }
-
-      .tradeoff-list li {
-        background: #0f172a;
-        padding: 20px;
-        border-radius: 8px;
-        border: 1px solid var(--panel-border);
+      .code-err {
+        background: rgba(217, 100, 95, 0.12);
+        color: #eb9691;
+        display: block;
       }
-
-      .tradeoff-list h3 {
-        font-size: 1rem;
-        color: #60a5fa;
-        margin-bottom: 8px;
+      .no-failures {
+        color: var(--text-dim);
+        font-style: italic;
       }
-
-      .tradeoff-list p {
-        font-size: 0.9rem;
-        color: #cbd5e1;
-        margin-bottom: 10px;
+      .conclusion-box {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 20px 22px;
       }
-
-      .tradeoff-list ul {
-        margin-left: 20px;
-        font-size: 0.88rem;
-        color: #94a3b8;
+      footer {
+        margin-top: 60px;
+        color: var(--text-dim);
+        font-size: 0.78rem;
+        border-top: 1px solid var(--border);
+        padding-top: 18px;
       }
-
-      .tradeoff-list li ul li {
-        background: transparent;
-        padding: 2px 0;
-        border: none;
-        list-style-type: disc;
+      @media (max-width: 560px) {
+        .comparison-grid {
+          grid-template-columns: 1fr;
+        }
+        table,
+        thead,
+        tbody,
+        th,
+        td,
+        tr {
+          display: block;
+        }
+        thead {
+          display: none;
+        }
+        tr {
+          border-bottom: 1px solid var(--border);
+          padding: 10px 0;
+        }
+        td {
+          border: none;
+          padding: 4px 0;
+        }
+        td::before {
+          content: attr(data-label);
+          color: var(--text-dim);
+          display: inline-block;
+          width: 110px;
+          font-size: 0.75rem;
+        }
+      }
+      a {
+        color: var(--teal);
+      }
+      :focus-visible {
+        outline: 2px solid var(--gold);
+        outline-offset: 2px;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <header>
-        <div class="header-title">
-          <h1>Project 0: Model Evaluation Report</h1>
-        </div>
+      <header class="title-block">
+        <h1>Project 0 — Model Bake-Off Report</h1>
         <p class="subtitle">
-          Automated 50-Item Benchmark Bakeoff &nbsp;|&nbsp;
-          <span class="pill-meta">Temperature = 0.0</span>
-          <span class="pill-meta">Max Tokens = 256</span>
+          Three models, one frozen test set, judged on accuracy, latency and
+          cost.
         </p>
+        <div class="meta-row">
+          <div>
+            <span class="k">Team</span>Nadia Ben Njima, Ahmed Brini, Rahma Sbei,
+            Mariem Lahmar
+          </div>
+          <div><span class="k">Date</span>2026-09-13</div>
+        </div>
       </header>
 
+      <hr class="divider" />
+
       <section>
-        <h2>1. Benchmark Results Summary</h2>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Tier</th>
-                <th>Model</th>
-                <th>Score</th>
-                <th>Accuracy (%)</th>
-                <th>p50 Latency</th>
-                <th>p95 Latency</th>
-                <th>Throughput</th>
-                <th>Cost / 1k Req</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong style="color: #f8fafc">Top API Model</strong></td>
-                <td>
-                  <code class="model-code"
-                    >nvidia/nemotron-3-ultra-550b-a55b:free</code
-                  >
-                </td>
-                <td><span class="pill pill-neutral">37/50</span></td>
-                <td>
-                  <span
-                    class="pill"
-                    style="
-                      background: #f59e0b20;
-                      color: #f59e0b;
-                      border: 1px solid #f59e0b40;
-                    "
-                    >74.0%</span
-                  >
-                </td>
-                <td><span class="latency-val">90388.19 ms</span></td>
-                <td><span class="latency-val">160804.50 ms</span></td>
-                <td><span class="latency-val">N/A (API)</span></td>
-                <td><span class="pill pill-free">$0.00 (Free Tier)</span></td>
-              </tr>
-              <tr>
-                <td><strong style="color: #f8fafc">Cheap API Model</strong></td>
-                <td>
-                  <code class="model-code">cohere/north-mini-code:free</code>
-                </td>
-                <td><span class="pill pill-neutral">16/50</span></td>
-                <td>
-                  <span
-                    class="pill"
-                    style="
-                      background: #ef444420;
-                      color: #ef4444;
-                      border: 1px solid #ef444440;
-                    "
-                    >32.0%</span
-                  >
-                </td>
-                <td><span class="latency-val">1463.70 ms</span></td>
-                <td><span class="latency-val">3171.41 ms</span></td>
-                <td><span class="latency-val">N/A (API)</span></td>
-                <td><span class="pill pill-free">$0.00 (Free Tier)</span></td>
-              </tr>
-              <tr>
-                <td>
-                  <strong style="color: #f8fafc"
-                    >Local Open-Weights Model</strong
-                  >
-                </td>
-                <td><code class="model-code">qwen2.5 (7B / Ollama)</code></td>
-                <td><span class="pill pill-neutral">23/50</span></td>
-                <td>
-                  <span
-                    class="pill"
-                    style="
-                      background: #ef444420;
-                      color: #ef4444;
-                      border: 1px solid #ef444440;
-                    "
-                    >46.0%</span
-                  >
-                </td>
-                <td><span class="latency-val">1211.47 ms</span></td>
-                <td><span class="latency-val">1604.22 ms</span></td>
-                <td><span class="latency-val">48.2 tok/s</span></td>
-                <td>
-                  <span class="pill pill-free">$0.00 (Local Compute)</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <h2><span class="sec-no">01</span>The task</h2>
+        <p>
+          Evaluate three models on 50 short math problems against a
+          human-verified answer.
+        </p>
+        <div class="example-box">
+          <span class="label">Example item</span>
+          A rectangle's length is 3m longer than width w. Perimeter is 26m.
+          Calculate width w. — expected answer: <code>5</code>
         </div>
       </section>
 
       <section>
-        <h2>2. Failure Analysis & Sample Errors</h2>
-        <div class="failure-grid">
-          <div class="failure-card">
-            <div class="card-header">
-              <span class="badge badge-fail">FAILED</span>
-              <span class="item-id">Item #math_01</span>
-              <span class="tier-tag"
-                >Top API Model (nvidia/nemotron-3-ultra-550b-a55b:free)</span
-              >
+        <h2><span class="sec-no">02</span>Results summary</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Model</th>
+              <th>Score</th>
+              <th>Accuracy</th>
+              <th>p50</th>
+              <th>p95</th>
+              <th>$/1k now</th>
+              <th>$/1k @100x</th>
+              <th>Throughput</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="">
+              <td>Top API Model</td>
+              <td><code>openai/gpt-oss-120b</code></td>
+              <td>50/50</td>
+              <td>
+                <span
+                  class="pill"
+                  style="
+                    background: #6fae7c22;
+                    color: #6fae7c;
+                    border: 1px solid #6fae7c55;
+                  "
+                  >100.0%</span
+                >
+              </td>
+              <td>518 ms</td>
+              <td>2864 ms</td>
+              <td class="num">$0.0693</td>
+              <td class="num">$0.0693</td>
+              <td class="num">—</td>
+            </tr>
+            <tr class="winner-row">
+              <td>
+                Cheap API Model <span class="winner-tag">recommended</span>
+              </td>
+              <td><code>openai/gpt-oss-20b</code></td>
+              <td>50/50</td>
+              <td>
+                <span
+                  class="pill"
+                  style="
+                    background: #6fae7c22;
+                    color: #6fae7c;
+                    border: 1px solid #6fae7c55;
+                  "
+                  >100.0%</span
+                >
+              </td>
+              <td>566 ms</td>
+              <td>2494 ms</td>
+              <td class="num">$0.0360</td>
+              <td class="num">$0.0360</td>
+              <td class="num">—</td>
+            </tr>
+            <tr class="">
+              <td>Local Open-Weights Model</td>
+              <td><code>qwen2.5:7b</code></td>
+              <td>24/50</td>
+              <td>
+                <span
+                  class="pill"
+                  style="
+                    background: #d9645f22;
+                    color: #d9645f;
+                    border: 1px solid #d9645f55;
+                  "
+                  >48.0%</span
+                >
+              </td>
+              <td>2095 ms</td>
+              <td>3234 ms</td>
+              <td class="num">$0.0000</td>
+              <td class="num">$0.0000</td>
+              <td class="num">3.2 tok/s</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2><span class="sec-no">03</span>Data &amp; setup</h2>
+        <div class="kv-panel">
+          <div class="kv-row">
+            <span class="kv-key">Source</span
+            ><span class="kv-val">Hand-written by the team</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">Composition</span
+            ><span class="kv-val"
+              >10 arithmetic, 10 algebraic substitution, 30 word problems /
+              finance</span
+            >
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">Label check</span
+            ><span class="kv-val"
+              >Two team members independently solved each item; all ground-truth
+              answers matched</span
+            >
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">Dev/test split</span
+            ><span class="kv-val"
+              >None — all 50 items served as the single frozen test set</span
+            >
+          </div>
+        </div>
+        <table style="margin-top: 20px">
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Model</th>
+              <th>Provider</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Top API Model</td>
+              <td><code>openai/gpt-oss-120b</code></td>
+              <td>Groq</td>
+            </tr>
+            <tr>
+              <td>Cheap API Model</td>
+              <td><code>openai/gpt-oss-20b</code></td>
+              <td>Groq</td>
+            </tr>
+            <tr>
+              <td>Local Open-Weights Model</td>
+              <td><code>qwen2.5:7b</code></td>
+              <td>Ollama (self-hosted)</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="kv-panel" style="margin-top: 16px">
+          <div class="kv-row">
+            <span class="kv-key">Temperature</span><span class="kv-val">0</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">Max tokens</span
+            ><span class="kv-val">256</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">System prompt</span
+            ><span class="kv-val"
+              >Identical across models, forces \boxed{answer}-only output</span
+            >
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">Item order</span
+            ><span class="kv-val"
+              >Same 50 items, same order, same parser for all models</span
+            >
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">Run date</span
+            ><span class="kv-val">2026-09-13</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="sec-no">04</span>Cost at scale &amp; break-even</h2>
+
+        <p>
+          Local hosting's cost per request falls as more traffic is spread over
+          the same fixed hardware. Below each threshold, the API is cheaper
+          because you're paying for idle hardware time; above it, self-hosting
+          wins per request.
+        </p>
+        <div class="kv-panel">
+          <div class="kv-row">
+            <span class="kv-key">vs. openai/gpt-oss-120b</span>
+            <span class="kv-val">~0 requests/hour</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">vs. openai/gpt-oss-20b</span>
+            <span class="kv-val">~0 requests/hour</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="sec-no">05</span>Failure analysis</h2>
+
+        <div class="failure-card">
+          <div class="card-header">
+            <span class="item-id">Item math_04</span>
+            <span class="tier-tag">Local Open-Weights Model · qwen2.5:7b</span>
+          </div>
+          <p class="failure-q">Evaluate: 6 + 12 / 3 * 2</p>
+          <div class="comparison-grid">
+            <div>
+              <span class="label">Expected</span
+              ><code class="code-target">14</code>
             </div>
-            <div class="card-body">
-              <p style="margin-bottom: 12px">
-                <strong>Prompt:</strong> Evaluate: 4 * 4 + 1
-              </p>
-              <div class="comparison-grid">
-                <div>
-                  <span class="label">Expected Target:</span>
-                  <code class="code-target">17</code>
-                </div>
-                <div>
-                  <span class="label">Model Output:</span>
-                  <code class="code-err"
-                    >[ERROR/TIMEOUT: 'NoneType' object is not
-                    subscriptable]</code
-                  >
-                </div>
-              </div>
+            <div>
+              <span class="label">Model output</span
+              ><code class="code-err">20</code>
             </div>
           </div>
-
-          <div class="failure-card">
-            <div class="card-header">
-              <span class="badge badge-fail">FAILED</span>
-              <span class="item-id">Item #math_03</span>
-              <span class="tier-tag"
-                >Top API Model (nvidia/nemotron-3-ultra-550b-a55b:free)</span
-              >
+        </div>
+        <div class="failure-card">
+          <div class="card-header">
+            <span class="item-id">Item math_05</span>
+            <span class="tier-tag">Local Open-Weights Model · qwen2.5:7b</span>
+          </div>
+          <p class="failure-q">Evaluate: (8 + 2) * 3 - 5</p>
+          <div class="comparison-grid">
+            <div>
+              <span class="label">Expected</span
+              ><code class="code-target">25</code>
             </div>
-            <div class="card-body">
-              <p style="margin-bottom: 12px">
-                <strong>Prompt:</strong> Evaluate: 20 - 4 / 2
-              </p>
-              <div class="comparison-grid">
-                <div>
-                  <span class="label">Expected Target:</span>
-                  <code class="code-target">18</code>
-                </div>
-                <div>
-                  <span class="label">Model Output:</span>
-                  <code class="code-err"
-                    >[ERROR/TIMEOUT: 'NoneType' object is not
-                    subscriptable]</code
-                  >
-                </div>
-              </div>
+            <div>
+              <span class="label">Model output</span
+              ><code class="code-err">21</code>
             </div>
           </div>
-
-          <div class="failure-card">
-            <div class="card-header">
-              <span class="badge badge-fail">FAILED</span>
-              <span class="item-id">Item #math_14</span>
-              <span class="tier-tag"
-                >Top API Model (nvidia/nemotron-3-ultra-550b-a55b:free)</span
-              >
-            </div>
-            <div class="card-body">
-              <p style="margin-bottom: 12px">
-                <strong>Prompt:</strong> Evaluate (m / 2)^2 - 5 for m = 10.
-              </p>
-              <div class="comparison-grid">
-                <div>
-                  <span class="label">Expected Target:</span>
-                  <code class="code-target">20</code>
-                </div>
-                <div>
-                  <span class="label">Model Output:</span>
-                  <code class="code-err"
-                    >[ERROR/TIMEOUT: 'NoneType' object is not
-                    subscriptable]</code
-                  >
-                </div>
-              </div>
-            </div>
+        </div>
+        <div class="failure-card">
+          <div class="card-header">
+            <span class="item-id">Item math_07</span>
+            <span class="tier-tag">Local Open-Weights Model · qwen2.5:7b</span>
           </div>
-
-          <div class="failure-card">
-            <div class="card-header">
-              <span class="badge badge-fail">FAILED</span>
-              <span class="item-id">Item #math_02</span>
-              <span class="tier-tag"
-                >Cheap API Model (cohere/north-mini-code:free)</span
-              >
+          <p class="failure-q">Evaluate: 100 - 10 * 3^2</p>
+          <div class="comparison-grid">
+            <div>
+              <span class="label">Expected</span
+              ><code class="code-target">10</code>
             </div>
-            <div class="card-body">
-              <p style="margin-bottom: 12px">
-                <strong>Prompt:</strong> Evaluate: 2 + 3 * 5
-              </p>
-              <div class="comparison-grid">
-                <div>
-                  <span class="label">Expected Target:</span>
-                  <code class="code-target">17</code>
-                </div>
-                <div>
-                  <span class="label">Model Output:</span>
-                  <code class="code-err">.</code>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="failure-card">
-            <div class="card-header">
-              <span class="badge badge-fail">FAILED</span>
-              <span class="item-id">Item #math_06</span>
-              <span class="tier-tag"
-                >Cheap API Model (cohere/north-mini-code:free)</span
-              >
-            </div>
-            <div class="card-body">
-              <p style="margin-bottom: 12px">
-                <strong>Prompt:</strong> Evaluate: 15 / 3 + 2 * 6
-              </p>
-              <div class="comparison-grid">
-                <div>
-                  <span class="label">Expected Target:</span>
-                  <code class="code-target">17</code>
-                </div>
-                <div>
-                  <span class="label">Model Output:</span>
-                  <code class="code-err"
-                    >[ERROR/TIMEOUT: 'NoneType' object has no attribute
-                    'strip']</code
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="failure-card">
-            <div class="card-header">
-              <span class="badge badge-fail">FAILED</span>
-              <span class="item-id">Item #math_09</span>
-              <span class="tier-tag"
-                >Cheap API Model (cohere/north-mini-code:free)</span
-              >
-            </div>
-            <div class="card-body">
-              <p style="margin-bottom: 12px">
-                <strong>Prompt:</strong> Evaluate: 18 / (6 - 3) + 7
-              </p>
-              <div class="comparison-grid">
-                <div>
-                  <span class="label">Expected Target:</span>
-                  <code class="code-target">13</code>
-                </div>
-                <div>
-                  <span class="label">Model Output:</span>
-                  <code class="code-err"
-                    >[ERROR/TIMEOUT: 'NoneType' object has no attribute
-                    'strip']</code
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="failure-card">
-            <div class="card-header">
-              <span class="badge badge-fail">FAILED</span>
-              <span class="item-id">Item #math_01</span>
-              <span class="tier-tag">Local Open-Weights Model (qwen2.5)</span>
-            </div>
-            <div class="card-body">
-              <p style="margin-bottom: 12px">
-                <strong>Prompt:</strong> Evaluate: 4 * 4 + 1
-              </p>
-              <div class="comparison-grid">
-                <div>
-                  <span class="label">Expected Target:</span>
-                  <code class="code-target">17</code>
-                </div>
-                <div>
-                  <span class="label">Model Output:</span>
-                  <code class="code-err"
-                    >[ERROR/TIMEOUT: Error code: 500 - {'error': {'message':
-                    'llama-server process has terminated: exit status 1:
-                    ggml_backend_cpu_buffer_type_alloc_buffer: failed to
-                    allocate buffer of size 2661705728\nalloc_tensor_range:
-                    failed to allocate CUDA_Host buffer of size
-                    2661705728\nerror loading model: unable to allocate
-                    CUDA_Host buffer', 'type': 'api_error', 'param': None,
-                    'code': None}}]</code
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="failure-card">
-            <div class="card-header">
-              <span class="badge badge-fail">FAILED</span>
-              <span class="item-id">Item #math_04</span>
-              <span class="tier-tag">Local Open-Weights Model (qwen2.5)</span>
-            </div>
-            <div class="card-body">
-              <p style="margin-bottom: 12px">
-                <strong>Prompt:</strong> Evaluate: 6 + 12 / 3 * 2
-              </p>
-              <div class="comparison-grid">
-                <div>
-                  <span class="label">Expected Target:</span>
-                  <code class="code-target">14</code>
-                </div>
-                <div>
-                  <span class="label">Model Output:</span>
-                  <code class="code-err">20</code>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="failure-card">
-            <div class="card-header">
-              <span class="badge badge-fail">FAILED</span>
-              <span class="item-id">Item #math_05</span>
-              <span class="tier-tag">Local Open-Weights Model (qwen2.5)</span>
-            </div>
-            <div class="card-body">
-              <p style="margin-bottom: 12px">
-                <strong>Prompt:</strong> Evaluate: (8 + 2) * 3 - 5
-              </p>
-              <div class="comparison-grid">
-                <div>
-                  <span class="label">Expected Target:</span>
-                  <code class="code-target">25</code>
-                </div>
-                <div>
-                  <span class="label">Model Output:</span>
-                  <code class="code-err">21</code>
-                </div>
-              </div>
+            <div>
+              <span class="label">Model output</span
+              ><code class="code-err">40</code>
             </div>
           </div>
         </div>
       </section>
 
       <section>
-        <h2>3. Analysis & System Architecture Trade-offs</h2>
-        <ul class="tradeoff-list">
-          <li>
-            <h3>3.1 Operational Volatility of Free & Cheap Endpoints</h3>
-            <p>
-              Free public endpoints (<code>nemotron-3-ultra</code> and
-              <code>north-mini-code</code>) showed severe operational
-              instability, meaning many test failures came from infrastructure
-              drops rather than core model limitations:
-            </p>
-            <ul>
-              <li>
-                <strong>Timeouts & Empty Payloads:</strong> High tenant load
-                caused frequent request drops, surfacing as Python
-                <code>NoneType</code> errors (scored as failures per benchmark
-                rules).
-              </li>
-              <li>
-                <strong>Queueing Delays:</strong>
-                <code>nemotron-3-ultra</code> latencies spiked (p50 > 90s, p95 >
-                160s) due to API queueing rather than slow raw inference.
-              </li>
-              <li>
-                <strong>Takeaway:</strong> Free API tiers bring high
-                availability risk and unpredictable latency, making them unfit
-                for production environments.
-              </li>
-            </ul>
-          </li>
-
-          <li>
-            <h3>3.2 Analysis of Symbolic & Reasoning Failures</h3>
-            <p>
-              Reviewing model output errors highlights key execution and
-              architectural bottlenecks:
-            </p>
-            <ul>
-              <li>
-                <strong>Order-of-Operations Bias:</strong> On math prompts like
-                <code>6 + 12 / 3 * 2</code>, local models evaluated strictly
-                left-to-right (returning <code>20</code> instead of
-                <code>14</code>), showing how standard attention mechanisms miss
-                operator precedence without step-by-step scratchpads.
-              </li>
-              <li>
-                <strong>Host Memory Allocation Crashes:</strong>
-                <code>llama-server</code> failed on Item
-                <code>#math_01</code> due to CUDA host buffer memory spikes
-                during local execution.
-              </li>
-              <li>
-                <strong>Output Suppression:</strong>
-                <code>north-mini-code</code> often returned single periods
-                (<code>.</code>) at temperature 0.0 when constrained to strict
-                output formats.
-              </li>
-            </ul>
-          </li>
-
-          <li>
-            <h3>3.3 Cost Projections & Production Choice</h3>
-            <p>
-              Balancing throughput stability and costs guides our final setup:
-            </p>
-            <ul>
-              <li>
-                <strong>Break-Even Analysis:</strong> At 5,000 requests/day,
-                lightweight paid APIs cost < $0.10/day, while cloud GPU
-                instances for local hosting (e.g., AWS <code>g4dn.xlarge</code>)
-                run ~$12.60/day. Self-hosting only becomes cheaper than
-                pay-as-you-go APIs above <strong>85,000 requests/day</strong>.
-              </li>
-              <li>
-                <strong>Final Recommendation:</strong> Use a lightweight paid
-                API (e.g., Claude Haiku or GPT-4o-mini) for low-latency tasks.
-                <code>nemotron-3-ultra</code> is too slow (90s+), and local
-                <code>qwen2.5</code> needs fine-tuning or scratchpads to fix
-                math errors.
-              </li>
-              <li>
-                <strong>Decision Triggers:</strong>
-                <ul>
-                  <li>
-                    Switch to local <code>qwen2.5</code> if volume exceeds
-                    85,000 reqs/day or strict data privacy rules apply.
-                  </li>
-                  <li>
-                    Switch to top-tier paid APIs if task complexity requires
-                    >90% symbolic accuracy.
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </li>
-        </ul>
+        <h2><span class="sec-no">05</span> Hardware note — qwen2.5:7b</h2>
+        <div class="kv-panel">
+          <div class="kv-row">
+            <span class="kv-key">Machine</span
+            ><span class="kv-val">NVIDIA GeForce RTX 3050, 24GB RAM</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">Ollama version</span
+            ><span class="kv-val">0.34.0</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">Measured p50 latency</span
+            ><span class="kv-val">2095 ms</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">Measured throughput</span
+            ><span class="kv-val">3.2 tok/s</span>
+          </div>
+        </div>
       </section>
+
+      <section>
+        <h2><span class="sec-no">06</span>Conclusion</h2>
+        <div class="conclusion-box">
+          <p>
+            <strong>openai/gpt-oss-20b</strong> (Cheap API Model) is the pick
+            from this run: 100.0% accuracy at $0.0360 per 1k requests, with a
+            566 ms median latency. qwen2.5:7b is cheaper per request
+            ($0.0000/1k) but trails on accuracy (48.0%), which is why it isn't
+            the top choice here. openai/gpt-oss-120b has the lowest median
+            latency (518 ms) if response time matters more than the accuracy
+            gap.
+          </p>
+          <p>
+            Self-hosting qwen2.5:7b isn't viable yet: accuracy (48.0%) is the
+            blocker, not cost. At scale its cost per request would fall toward
+            $0.0000/1k, but that only matters once its accuracy (48.0%) is
+            fixed, for instance through fine-tuning or a larger local model.
+          </p>
+          <p>
+            Revisit this call if traffic volume, problem difficulty, or model
+            pricing shifts enough to change any of the numbers above.
+          </p>
+        </div>
+      </section>
+
+      <footer>
+        Generated automatically from results/per_item.csv. Cost and break-even
+        figures assume a hardware rate of $0/hour.
+      </footer>
     </div>
   </body>
 </html>

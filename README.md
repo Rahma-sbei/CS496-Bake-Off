@@ -55,9 +55,7 @@ Outputs:
 
 ## Contributions
 
-<!-- TODO: fill in with real names before freezing the repo -->
-
 - **Rahma Sbei** — initial repo setup, task design (50 math items), SymPy scorer, HTML report generator
-- **[Name 2]** — [what they did]
-- **[Name 3]** — [what they did]
-- **[Name 4]** — [what they did]
+- **Ahmed Brini** — Code adjustment, postpartem
+- **Mariem Lahmar** — data validation, models research
+- **Nadia Ben Njima** — report creation, model research.
